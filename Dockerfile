@@ -5,16 +5,19 @@ ARG TARGETPLATFORM
 ARG TARGETOS
 ARG TARGETARCH
 
-
 # Example 1: Add nano using APT, since nextstrain/base based on Debian.
-RUN apt-get update && apt-get install -y nano
+RUN curl -fsSL https://install.julialang.org |  sh -s -- -y
 
+ENV PATH="${PATH}:/nextstrain/.juliaup/bin"
 
-# Example 2: Add yq by downloading the platform-specific binary to /usr/bin.
-# https://github.com/mikefarah/yq#install
-RUN BINARY="yq_${TARGETOS}_${TARGETARCH}" && wget https://github.com/mikefarah/yq/releases/download/v4.40.5/${BINARY}.tar.gz -O - | \
-  tar xz && mv ${BINARY} /usr/bin/yq
+RUN juliaup add 1.7.3
 
+RUN juliaup default 1.7.3
 
-# Example 3: Add seaborn using pip.
-RUN pip3 install seaborn
+RUN apt-get update
+
+RUN apt-get install -y gcc
+
+RUN julia -e 'using Pkg; Pkg.add("TreeKnit")'
+
+RUN julia -e 'using Pkg; Pkg.add("ArgParse")'
